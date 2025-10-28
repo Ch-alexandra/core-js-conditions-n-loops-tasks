@@ -368,8 +368,37 @@ function sortByAsc(/* arr */) {
  *  '012345', 3 => '024135' => '043215' => '031425'
  *  'qwerty', 3 => 'qetwry' => 'qtrewy' => 'qrwtey'
  */
-function shuffleChar(/* str, iterations */) {
-  throw new Error('Not implemented');
+
+function shuffleChar(str, iterations) {
+  let res = str;
+
+  function shuffle() {
+    let even = '';
+    let odd = '';
+    for (let i = 0; i < res.length; i += 1) {
+      if (i % 2 === 0) even += res[i];
+      else odd += res[i];
+    }
+    res = even + odd;
+  }
+
+  let loop = 0;
+  for (let i = 1; i <= iterations; i += 1) {
+    shuffle();
+    if (res === str) {
+      loop = i;
+      break;
+    }
+  }
+
+  const effectiveIterations = loop ? iterations % loop : iterations;
+
+  res = str;
+  for (let i = 0; i < effectiveIterations; i += 1) {
+    shuffle();
+  }
+
+  return res;
 }
 
 /**
@@ -384,13 +413,51 @@ function shuffleChar(/* str, iterations */) {
  * 123440   => 124034
  * 1203450  => 1203504
  * 90822    => 92028
+ *
+ * 1) sprava nalevo, ishem i > i+1 (8 > 0)
+ * 90822 -> 9*0** (i+1 = 0, i=8)
+ * 2) na mesto meshego stavim naimenshee sleva kotoroe est
+ * 920**
+ * 3) sortiruem ostatok po vozrastaniyu (ostatok: 2 i 8)
+ * 92028
+ *
  * 321321   => 322113
  *
  * @param {number} number The source number
  * @returns {number} The nearest larger number, or original number if none exists.
  */
-function getNearestBigger(/* number */) {
-  throw new Error('Not implemented');
+
+function getNearestBigger(number) {
+  function digitsToNumber(arr) {
+    let res = 0;
+    for (let i = 0; i < arr.length; i += 1) {
+      res = res * 10 + arr[i];
+    }
+    return res;
+  }
+
+  const digits = [];
+  let num = number;
+  while (num > 0) {
+    digits.push(num % 10);
+    num = Math.floor(num / 10);
+  }
+  digits.reverse();
+
+  let i = digits.length - 2;
+  while (i >= 0 && digits[i] >= digits[i + 1]) i -= 1;
+
+  if (i < 0) return digitsToNumber(digits);
+
+  let j = digits.length - 1;
+  while (digits[j] <= digits[i]) j -= 1;
+
+  [digits[i], digits[j]] = [digits[j], digits[i]];
+
+  const right = digits.splice(i + 1).sort((a, b) => a - b);
+  digits.push(...right);
+
+  return digitsToNumber(digits);
 }
 
 module.exports = {
